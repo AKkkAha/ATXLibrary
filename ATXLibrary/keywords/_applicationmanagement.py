@@ -49,10 +49,10 @@ class _ApplicationManagementKeywords(KeywordGroup):
         | Open Application | http://localhost:4723/wd/hub | platformName=Android | platformVersion=4.2.2 | deviceName=192.168.56.101:5555 | app=${CURDIR}/demoapp/OrangeDemoApp.apk | appPackage=com.netease.qa.orangedemo | appActivity=MainActivity |
         """
         desired_caps = kwargs
-        driver = u2.connect(device)
-        application = driver.app_start(pkg_name)
+        d = u2.connect(device)
+        application = d.app_start(pkg_name)
 
-        self._debug('Opened application with session id %s' % application.session_id)
+        self._debug('Opened application %s' % application)
 
         return self._cache.register(application, alias)
 

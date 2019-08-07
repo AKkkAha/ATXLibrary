@@ -127,7 +127,6 @@ class ElementFinder(object):
         # _find_by_key_attrs useful.
         return self._find_by_id(browser, criteria, tag, constraints)
 
-    # TODO: Not in use after conversion from Selenium2Library need to make more use of multiple auto selector strategy
     def _find_by_key_attrs(self, browser, criteria, tag, constraints):
         key_attrs = self._key_attrs.get(None)
         if tag is not None:
