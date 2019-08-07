@@ -11,12 +11,12 @@ class ApplicationCache(ConnectionCache):
     def applications(self):
         return self._connections
 
-    # def get_open_browsers(self):
-    #     open_applications = []
-    #     for application in self._connections:
-    #         if application not in self._closed:
-    #             open_applications.append(application)
-    #     return open_applications
+    def get_open_browsers(self):
+        open_applications = []
+        for application in self._connections:
+            if application not in self._closed:
+                open_applications.append(application)
+        return open_applications
 
     def close(self):
         if self.current:
