@@ -9,6 +9,7 @@ from ._waiting import _WaitingKeywords
 from ._touch import _TouchKeywords
 from ._keyevent import _KeyeventKeywords
 from ._android_utils import _AndroidUtilsKeywords
+from ._toast import _ToastKeywords
 
 __all__ = ["_LoggingKeywords",
            "_RunOnFailureKeywords",
@@ -18,4 +19,5 @@ __all__ = ["_LoggingKeywords",
            "_WaitingKeywords",
            "_TouchKeywords",
            "_KeyeventKeywords",
-           "_AndroidUtilsKeywords"]
+           "_AndroidUtilsKeywords",
+           "_ToastKeywords"]

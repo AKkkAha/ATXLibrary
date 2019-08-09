@@ -5,6 +5,8 @@ from robot.api import logger
 import time
 
 TIMEOUT = 10
+
+
 class ElementFinder(object):
 
     def __init__(self):
@@ -27,19 +29,15 @@ class ElementFinder(object):
         assert browser is not None
         assert locator is not None and len(locator) > 0
 
-        # if timeout is None:
-        #     timeout = TIMEOUT
-        # nowtime = time.time()
-        # while time.time() - nowtime < timeout:
-        #     print(time.time() - nowtime)
-        #     try:
-        #         element = browser(resourId=locator)
-        #         print(element, element.exists)
-        #         return element
-        #     except Exception:
-        #         time.sleep(0.5)
-        # raise Exception("find elememt: \"{}\" failed".format(locator))
-        return browser(resourceId=locator)
+        if timeout is None:
+            timeout = TIMEOUT
+        nowtime = time.time()
+        while time.time() - nowtime < timeout:
+            element = browser(resourceId=locator)
+            if element.exist():
+                return element
+            time.sleep(0.5)
+        raise Exception("find elememt: \"{}\" failed".format(locator))
 
     # Strategy routines, private
 

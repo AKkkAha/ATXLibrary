@@ -17,6 +17,7 @@ class ATXLibrary(
     _TouchKeywords,
     _KeyeventKeywords,
     _AndroidUtilsKeywords,
+    _ToastKeywords
 ):
 
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
