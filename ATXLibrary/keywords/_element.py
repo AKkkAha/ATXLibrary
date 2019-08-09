@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from AppiumLibrary.locators import ElementFinder
+from ATXLibrary.locators import ElementFinder
 from .keywordgroup import KeywordGroup
 from robot.libraries.BuiltIn import BuiltIn
 import ast
 from unicodedata import normalize
 from selenium.webdriver.remote.webelement import WebElement
+from uiautomator2 import UiObject
 
 try:
     basestring  # attempt to evaluate basestring
@@ -174,7 +175,7 @@ class _ElementKeywords(KeywordGroup):
         Key attributes for arbitrary elements are `id` and `name`. See
         `introduction` for details about locating elements.
 
-        New in AppiumLibrary 1.4.5
+        New in ATXLibrary 1.4.5
         """
         if not self._element_find(locator, True, True).is_displayed():
             self.log_source(loglevel)
@@ -283,7 +284,7 @@ class _ElementKeywords(KeywordGroup):
 
         Key attributes for arbitrary elements are ``id`` and ``xpath``. ``message`` can be used to override the default error message.
 
-        New in AppiumLibrary 1.4.
+        New in ATXLibrary 1.4.
         """
         self._info("Verifying element '%s' contains text '%s'."
                    % (locator, expected))
@@ -317,7 +318,7 @@ class _ElementKeywords(KeywordGroup):
 
         ``message`` can be used to override the default error message.
 
-        New in AppiumLibrary 1.4.
+        New in ATXLibrary 1.4.
         """
         self._info("Verifying element '%s' contains exactly text '%s'."
                    % (locator, expected))
@@ -336,7 +337,7 @@ class _ElementKeywords(KeywordGroup):
         | ${element}     | Get Webelement | id=my_element |
         | Click Element  | ${element}     |               |
 
-        New in AppiumLibrary 1.4.
+        New in ATXLibrary 1.4.
         """
         return self._element_find(locator, True, True)
 
@@ -347,11 +348,11 @@ class _ElementKeywords(KeywordGroup):
         | @{elements}    | Get Webelements | id=my_element |
         | Click Element  | @{elements}[2]  |               |
 
-        This keyword was changed in AppiumLibrary 1.4 in following ways:
+        This keyword was changed in ATXLibrary 1.4 in following ways:
         - Name is changed from `Get Elements` to current one.
         - Deprecated argument ``fail_on_error``, use `Run Keyword and Ignore Error` if necessary.
 
-        New in AppiumLibrary 1.4.
+        New in ATXLibrary 1.4.
         """
         return self._element_find(locator, False, True)
 
@@ -377,6 +378,7 @@ class _ElementKeywords(KeywordGroup):
         except:
             raise AssertionError("Attribute '%s' is not valid for element '%s'" % (attribute, locator))
 
+    # UiObject没有此类方法
     def get_element_location(self, locator):
         """Get element location
 
@@ -384,7 +386,7 @@ class _ElementKeywords(KeywordGroup):
         `introduction` for details about locating elements.
         """
         element = self._element_find(locator, True, True)
-        element_location = element.location
+        element_location = element.pos_rel2abs()
         self._info("Element '%s' location: %s " % (locator, element_location))
         return element_location
 
@@ -406,7 +408,7 @@ class _ElementKeywords(KeywordGroup):
 
         | ${text} | Get Text | //*[contains(@text,'foo')] |
 
-        New in AppiumLibrary 1.4.
+        New in ATXLibrary 1.4.
         """
         text = self._get_text(locator)
         self._info("Element '%s' text is '%s' " % (locator, text))
@@ -425,7 +427,7 @@ class _ElementKeywords(KeywordGroup):
         If you wish to assert the number of matching elements, use
         `Xpath Should Match X Times`.
 
-        New in AppiumLibrary 1.4.
+        New in ATXLibrary 1.4.
         """
         count = len(self._element_find("xpath=" + xpath, False, False))
         return str(count)
@@ -433,7 +435,7 @@ class _ElementKeywords(KeywordGroup):
     def text_should_be_visible(self, text, exact_match=False, loglevel='INFO'):
         """Verifies that element identified with text is visible.
 
-        New in AppiumLibrary 1.4.5
+        New in ATXLibrary 1.4.5
         """
         if not self._element_find_by_text(text, exact_match).is_displayed():
             self.log_source(loglevel)
@@ -454,7 +456,7 @@ class _ElementKeywords(KeywordGroup):
 
         See `Log Source` for explanation about ``loglevel`` argument.
 
-        New in AppiumLibrary 1.4.
+        New in ATXLibrary 1.4.
         """
         actual_xpath_count = len(self._element_find("xpath=" + xpath, False, False))
         if int(actual_xpath_count) != int(count):
@@ -529,7 +531,7 @@ class _ElementKeywords(KeywordGroup):
     def _element_clear_text_by_locator(self, locator):
         try:
             element = self._element_find(locator, True, True)
-            element.clear()
+            element.clear_text()
         except Exception as e:
             raise e
 
@@ -555,7 +557,7 @@ class _ElementKeywords(KeywordGroup):
     def _element_input_value_by_locator(self, locator, text):
         try:
             element = self._element_find(locator, True, True)
-            element.set_value(text)
+            element.set_text(text)
         except Exception as e:
             raise e
 
@@ -570,7 +572,7 @@ class _ElementKeywords(KeywordGroup):
             if first_only:
                 if len(elements) == 0: return None
                 return elements[0]
-        elif isinstance(locator, WebElement):
+        elif isinstance(locator, UiObject):
             if first_only:
                 return locator
             else:
@@ -600,7 +602,7 @@ class _ElementKeywords(KeywordGroup):
     def _get_text(self, locator):
         element = self._element_find(locator, True, True)
         if element is not None:
-            return element.text
+            return element.get_text()
         return None
 
     def _is_text_present(self, text):
@@ -613,6 +615,7 @@ class _ElementKeywords(KeywordGroup):
         elements = self._element_finder.find(application, locator, None)
         return len(elements) > 0
 
+    # UiObject无此方法
     def _is_visible(self, locator):
         element = self._element_find(locator, True, False)
         if element is not None:

@@ -49,9 +49,10 @@ class _ApplicationManagementKeywords(KeywordGroup):
         | Open Application | http://localhost:4723/wd/hub | platformName=Android | platformVersion=4.2.2 | deviceName=192.168.56.101:5555 | app=${CURDIR}/demoapp/OrangeDemoApp.apk | appPackage=com.netease.qa.orangedemo | appActivity=MainActivity |
         """
         desired_caps = kwargs
-        d = u2.connect(device)
-        application = d.app_start(pkg_name)
-
+        driver = u2.connect(device)
+        application = driver
+        driver.app_stop(pkg_name)
+        driver.app_start(pkg_name)
         self._debug('Opened application %s' % application)
 
         return self._cache.register(application, alias)
@@ -103,7 +104,7 @@ class _ApplicationManagementKeywords(KeywordGroup):
 
         See `Quit Application` for quiting application but keeping Appium sesion running.
 
-        New in AppiumLibrary 1.4.6
+        New in ATXLibrary 1.4.6
         """
         driver = self._current_application()
         driver.launch_app()
@@ -114,7 +115,7 @@ class _ApplicationManagementKeywords(KeywordGroup):
 
         See `Launch Application` for an explanation.
 
-        New in AppiumLibrary 1.4.6
+        New in ATXLibrary 1.4.6
         """
         driver = self._current_application()
         driver.close_app()
@@ -135,13 +136,13 @@ class _ApplicationManagementKeywords(KeywordGroup):
         driver = self._current_application()
         driver.remove_app(application_id)
 
-    def get_appium_timeout(self):
+    def get_atx_timeout(self):
         """Gets the timeout in seconds that is used by various keywords.
 
         See `Set Appium Timeout` for an explanation."""
         return robot.utils.secs_to_timestr(self._timeout_in_secs)
 
-    def set_appium_timeout(self, seconds):
+    def set_atx_timeout(self, seconds):
         """Sets the timeout in seconds used by various keywords.
 
         There are several `Wait ...` keywords that take timeout as an
@@ -157,19 +158,22 @@ class _ApplicationManagementKeywords(KeywordGroup):
         | Open page that loads slowly |
         | Set Appium Timeout | ${orig timeout} |
         """
-        old_timeout = self.get_appium_timeout()
+        old_timeout = self.get_atx_timeout()
         self._timeout_in_secs = robot.utils.timestr_to_secs(seconds)
         return old_timeout
 
-    def get_appium_sessionId(self):
+    # uiautomator2无此方法
+    def get_atx_sessionId(self):
         """Returns the current session ID as a reference"""
         self._info("Appium Session ID: " + self._current_application().session_id)
         return self._current_application().session_id
 
+    # uiautomator2无此方法
     def get_source(self):
         """Returns the entire source of the current page."""
         return self._current_application().page_source
 
+    # uiautomator2无此方法
     def log_source(self, loglevel='INFO'):
         """Logs and returns the entire html source of the current page or frame.
 
@@ -187,6 +191,7 @@ class _ApplicationManagementKeywords(KeywordGroup):
             else:
                 return ''
 
+    # uiautomator2无此方法
     def execute_script(self, script):
         """
         Inject a snippet of JavaScript into the page for execution in the
@@ -195,10 +200,11 @@ class _ApplicationManagementKeywords(KeywordGroup):
         The executed script is assumed to be synchronous and the result
         of evaluating the script is returned to the client.
 
-        New in AppiumLibrary 1.5
+        New in ATXLibrary 1.5
         """
         return self._current_application().execute_script(script)
 
+    # uiautomator2无此方法
     def execute_async_script(self, script):
         """
         Inject a snippet of Async-JavaScript into the page for execution in the
@@ -211,20 +217,22 @@ class _ApplicationManagementKeywords(KeywordGroup):
         The value to this callback will be returned to the client.
 
 
-        New in AppiumLibrary 1.5
+        New in ATXLibrary 1.5
         """
         return self._current_application().execute_async_script(script)
 
     def go_back(self):
         """Goes one step backward in the browser history."""
-        self._current_application().back()
+        self._current_application().press('back')
 
+    # uiautomator2无此方法
     def lock(self, seconds=5):
         """
         Lock the device for a certain period of time. iOS only.
         """
-        self._current_application().lock(robot.utils.timestr_to_secs(seconds))
+        self._current_application().sreen_off()
 
+    # uiautomator2无此方法
     def background_app(self, seconds=5):
         """
         Puts the application in the background on the device for a certain
@@ -232,24 +240,27 @@ class _ApplicationManagementKeywords(KeywordGroup):
         """
         self._current_application().background_app(seconds)
 
+    # uiautomator2无此方法
     def touch_id(self, match=True):
         """
         Simulate Touch ID on iOS Simulator
 
         `match` (boolean) whether the simulated fingerprint is valid (default true)
 
-        New in AppiumLibrary 1.5
+        New in ATXLibrary 1.5
         """
         self._current_application().touch_id(match)
 
+    # uiautomator2无此方法
     def toggle_touch_id_enrollment(self):
         """
         Toggle Touch ID enrolled state on iOS Simulator
 
-        New in AppiumLibrary 1.5
+        New in ATXLibrary 1.5
         """
         self._current_application().toggle_touch_id_enrollment()
 
+    # uiautomator2无此方法
     def shake(self):
         """
         Shake the device
@@ -268,10 +279,12 @@ class _ApplicationManagementKeywords(KeywordGroup):
         """
         self._rotate('LANDSCAPE')
 
+    # uiautomator2无此方法
     def get_current_context(self):
         """Get current context."""
         return self._current_application().current_context
 
+    # uiautomator2无此方法
     def get_contexts(self):
         """Get available contexts."""
         print(self._current_application().contexts)
@@ -285,9 +298,9 @@ class _ApplicationManagementKeywords(KeywordGroup):
         | ${height}      | Get Window Height |
         | Click A Point  | ${width           | ${height} |
 
-        New in AppiumLibrary 1.4.5
+        New in ATXLibrary 1.4.5
         """
-        return self._current_application().get_window_size()['height']
+        return self._current_application().window_size()['height']
 
     def get_window_width(self):
         """Get current device width.
@@ -297,10 +310,11 @@ class _ApplicationManagementKeywords(KeywordGroup):
         | ${height}      | Get Window Height |
         | Click A Point  | ${width           | ${height} |
 
-        New in AppiumLibrary 1.4.5
+        New in ATXLibrary 1.4.5
         """
-        return self._current_application().get_window_size()['width']
+        return self._current_application().window_size()['width']
 
+    # uiautomator2无此方法
     def switch_to_context(self, context_name):
         """Switch to a new context"""
         self._current_application().switch_to.context(context_name)
@@ -315,6 +329,7 @@ class _ApplicationManagementKeywords(KeywordGroup):
         """
         self._current_application().get(url)
 
+    # uiautomator2无此方法
     def get_capability(self, capability_name):
         """
         Return the desired capability value by desired capability name
@@ -332,6 +347,7 @@ class _ApplicationManagementKeywords(KeywordGroup):
             raise RuntimeError('No application is open')
         return self._cache.current
 
+    # uiautomator2无此方法
     def _get_platform(self):
         try:
             platform_name = self._current_application().desired_capabilities['platformName']
@@ -339,13 +355,16 @@ class _ApplicationManagementKeywords(KeywordGroup):
             raise e
         return platform_name.lower()
 
+    # uiautomator2无此方法
     def _is_platform(self, platform):
         platform_name = self._get_platform()
         return platform.lower() == platform_name
 
+    # uiautomator2无此方法
     def _is_ios(self):
         return self._is_platform('ios')
 
+    # uiautomator2无此方法
     def _is_android(self):
         return self._is_platform('android')
 

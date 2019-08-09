@@ -105,7 +105,7 @@ class _AndroidUtilsKeywords(KeywordGroup):
 
         """
 
-        # Almost the same code as in appium's start activity,
+        # Almost the same code as in atx's start activity,
         # just to keep the same keyword names as in open application
 
         arguments = {
@@ -166,7 +166,7 @@ class _AndroidUtilsKeywords(KeywordGroup):
         - _altitude_ = 10 [optional]
 
         Android only.
-        New in AppiumLibrary 1.5
+        New in ATXLibrary 1.5
         """
         driver = self._current_application()
         driver.set_location(latitude, longitude, altitude)

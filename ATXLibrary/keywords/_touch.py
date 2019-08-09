@@ -1,51 +1,140 @@
 # -*- coding: utf-8 -*-
 
-import os
-import robot
+from uiautomator2 import UiObject
+
+from ATXLibrary.locators import ElementFinder
 from .keywordgroup import KeywordGroup
 
 
-class _ScreenshotKeywords(KeywordGroup):
+class _TouchKeywords(KeywordGroup):
 
     def __init__(self):
-        self._screenshot_index = 0
+        self._element_finder = ElementFinder()
 
-    # Public
-
-    def capture_page_screenshot(self, filename=None):
-        """Takes a screenshot of the current page and embeds it into the log.
-
-        `filename` argument specifies the name of the file to write the
-        screenshot into. If no `filename` is given, the screenshot is saved into file
-        `appium-screenshot-<counter>.png` under the directory where
-        the Robot Framework log file is written into. The `filename` is
-        also considered relative to the same directory, if it is not
-        given in absolute format.
-
-        `css` can be used to modify how the screenshot is taken. By default
-        the bakground color is changed to avoid possible problems with
-        background leaking when the page layout is somehow broken.
+    # Public, element lookups
+    def zoom(self, locator, percent="200%", steps=1):
         """
-        path, link = self._get_screenshot_paths(filename)
+        Zooms in on an element a certain amount.
+        """
+        driver = self._current_application()
+        element = self._element_find(locator, True, True)
+        driver.zoom(element=element, percent=percent, steps=steps)
 
-        if hasattr(self._current_application(), 'get_screenshot_as_file'):
-            self._current_application().get_screenshot_as_file(path)
+    def pinch(self, locator, percent="200%", steps=1):
+        """
+        Pinch in on an element a certain amount.
+        """
+        driver = self._current_application()
+        element = self._element_find(locator, True, True)
+        driver.pinch(element=element, percent=percent, steps=steps)
+
+    def swipe(self, start_x, start_y, offset_x, offset_y, duration=1000):
+        """
+        Swipe from one point to another point, for an optional duration.
+
+        Args:
+         - start_x - x-coordinate at which to start
+         - start_y - y-coordinate at which to start
+         - offset_x - x-coordinate distance from start_x at which to stop
+         - offset_y - y-coordinate distance from start_y at which to stop
+         - duration - (optional) time to take the swipe, in ms.
+
+        Usage:
+        | Swipe | 500 | 100 | 100 | 0 | 1000 |
+
+        _*NOTE: *_
+        Android 'Swipe' is not working properly, use ``offset_x`` and ``offset_y`` as if these are destination points.
+        """
+        driver = self._current_application()
+        driver.swipe(start_x, start_y, offset_x, offset_y, duration)
+
+    def swipe_by_percent(self, start_x, start_y, end_x, end_y, duration=1000):
+        """
+        Swipe from one percent of the screen to another percent, for an optional duration.
+        Normal swipe fails to scale for different screen resolutions, this can be avoided using percent.
+
+        Args:
+         - start_x - x-percent at which to start
+         - start_y - y-percent at which to start
+         - end_x - x-percent distance from start_x at which to stop
+         - end_y - y-percent distance from start_y at which to stop
+         - duration - (optional) time to take the swipe, in ms.
+
+        Usage:
+        | Swipe By Percent | 90 | 50 | 10 | 50 | # Swipes screen from right to left. |
+
+        _*NOTE: *_
+        This also considers swipe acts different between iOS and Android.
+
+        New in AppiumLibrary 1.4.5
+        """
+        width = self.get_window_width()
+        height = self.get_window_height()
+        x_start = float(start_x) / 100 * width
+        x_end = float(end_x) / 100 * width
+        y_start = float(start_y) / 100 * height
+        y_end = float(end_y) / 100 * height
+        x_offset = x_end - x_start
+        y_offset = y_end - y_start
+        platform = self._get_platform()
+        if platform == 'android':
+            self.swipe(x_start, y_start, x_end, y_end, duration)
         else:
-            self._current_application().save_screenshot(path)
+            self.swipe(x_start, y_start, x_offset, y_offset, duration)
 
-        # Image is shown on its own row and thus prev row is closed on purpose
-        self._html('</td></tr><tr><td colspan="3"><a href="%s">'
-                   '<img src="%s" width="800px"></a>' % (link, link))
+    # uiautomator2无此方法
+    def scroll(self, start_locator, end_locator):
+        """
+        Scrolls from one element to another
+        Key attributes for arbitrary elements are `id` and `name`. See
+        `introduction` for details about locating elements.
+        """
+        el1 = self._element_find(start_locator, True, True)
+        el2 = self._element_find(end_locator, True, True)
+        driver = self._current_application()
+        driver.scroll(el1, el2)
 
-    # Private
+    def scroll_down(self, locator):
+        """Scrolls down to element"""
+        driver = self._current_application()
+        element = self._element_find(locator, True, True)
+        driver.execute_script("mobile: scroll", {"direction": 'down', 'element': element.id})
 
-    def _get_screenshot_paths(self, filename):
-        if not filename:
-            self._screenshot_index += 1
-            filename = 'appium-screenshot-%d.png' % self._screenshot_index
-        else:
-            filename = filename.replace('/', os.sep)
-        logdir = self._get_log_dir()
-        path = os.path.join(logdir, filename)
-        link = robot.utils.get_link_path(path, logdir)
-        return path, link
+    def scroll_up(self, locator):
+        """Scrolls up to element"""
+        driver = self._current_application()
+        element = self._element_find(locator, True, True)
+        driver.execute_script("mobile: scroll", {"direction": 'up', 'element': element.id})
+
+    def long_press(self, locator, duration=1000):
+        """ Long press the element with optional duration """
+        driver = self._current_application()
+        element = self._element_find(locator, True, True)
+        element.long_click()
+
+    def tap(self, locator, x_offset=None, y_offset=None, count=1):
+        """ Tap element identified by ``locator``.
+
+        Args:
+        - ``x_offset`` - (optional) x coordinate to tap, relative to the top left corner of the element.
+        - ``y_offset`` - (optional) y coordinate. If y is used, x must also be set, and vice versa
+        - ``count`` - can be used for multiple times of tap on that element
+        """
+        driver = self._current_application()
+        el = self._element_find(locator, True, True)
+        driver.tap(x_offset, y_offset)
+
+    def click_a_point(self, x=0, y=0, duration=100):
+        """ Click on a point"""
+        self._info("Clicking on a point (%s,%s)." % (x,y))
+        driver = self._current_application()
+        try:
+            driver.press(x=float(x), y=float(y))
+        except:
+            assert False, "Can't click on a point at (%s,%s)" % (x,y)
+
+    def click_element_at_coordinates(self, coordinate_X, coordinate_Y):
+        """ click element at a certain coordinate """
+        self._info("Pressing at (%s, %s)." % (coordinate_X, coordinate_Y))
+        driver = self._current_application()
+        driver.press(x=coordinate_X, y=coordinate_Y)

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from AppiumLibrary import utils
+from ATXLibrary import utils
 from robot.api import logger
+import time
 
-
+TIMEOUT = 10
 class ElementFinder(object):
 
     def __init__(self):
@@ -19,21 +20,26 @@ class ElementFinder(object):
             'css': self._find_by_css_selector,
             'jquery': self._find_by_sizzle_selector,
             'nsp': self._find_by_nsp,
-            'chain': self._find_by_chain,
-            'default': self._find_by_default
+            'chain': self._find_by_chain
         }
 
-    def find(self, browser, locator, tag=None):
+    def find(self, browser, locator, timeout=None):
         assert browser is not None
         assert locator is not None and len(locator) > 0
 
-        (prefix, criteria) = self._parse_locator(locator)
-        prefix = 'default' if prefix is None else prefix
-        strategy = self._strategies.get(prefix)
-        if strategy is None:
-            raise ValueError("Element locator with prefix '" + prefix + "' is not supported")
-        (tag, constraints) = self._get_tag_and_constraints(tag)
-        return strategy(browser, criteria, tag, constraints)
+        # if timeout is None:
+        #     timeout = TIMEOUT
+        # nowtime = time.time()
+        # while time.time() - nowtime < timeout:
+        #     print(time.time() - nowtime)
+        #     try:
+        #         element = browser(resourId=locator)
+        #         print(element, element.exists)
+        #         return element
+        #     except Exception:
+        #         time.sleep(0.5)
+        # raise Exception("find elememt: \"{}\" failed".format(locator))
+        return browser(resourceId=locator)
 
     # Strategy routines, private
 
@@ -123,7 +129,7 @@ class ElementFinder(object):
         if criteria.startswith('//'):
             return self._find_by_xpath(browser, criteria, tag, constraints)
         # Used `id` instead of _find_by_key_attrs since iOS and Android internal `id` alternatives are
-        # different and inside appium python client. Need to expose these and improve in order to make
+        # different and inside atx python client. Need to expose these and improve in order to make
         # _find_by_key_attrs useful.
         return self._find_by_id(browser, criteria, tag, constraints)
 

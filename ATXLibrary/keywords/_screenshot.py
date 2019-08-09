@@ -28,10 +28,12 @@ class _ScreenshotKeywords(KeywordGroup):
         """
         path, link = self._get_screenshot_paths(filename)
 
-        if hasattr(self._current_application(), 'get_screenshot_as_file'):
-            self._current_application().get_screenshot_as_file(path)
-        else:
-            self._current_application().save_screenshot(path)
+        # if hasattr(self._current_application(), 'get_screenshot_as_file'):
+            # self._current_application().get_screenshot_as_file(path)
+        # else:
+            # self._current_application().save_screenshot(path)
+        print(path)
+        self._current_application().screenshot(path)
 
         # Image is shown on its own row and thus prev row is closed on purpose
         self._html('</td></tr><tr><td colspan="3"><a href="%s">'
@@ -42,7 +44,7 @@ class _ScreenshotKeywords(KeywordGroup):
     def _get_screenshot_paths(self, filename):
         if not filename:
             self._screenshot_index += 1
-            filename = 'appium-screenshot-%d.png' % self._screenshot_index
+            filename = 'atx-screenshot-%d.png' % self._screenshot_index
         else:
             filename = filename.replace('/', os.sep)
         logdir = self._get_log_dir()

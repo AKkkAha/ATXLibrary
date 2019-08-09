@@ -30,7 +30,7 @@ class _KeyeventKeywords(KeywordGroup):
          - _metastate- - status of the meta keys
         """
         driver = self._current_application()
-        driver.press_keycode(keycode, metastate)
+        driver.press(keycode, metastate)
 
     def long_press_keycode(self, keycode, metastate=None):
         """Sends a long press of keycode to the device.
