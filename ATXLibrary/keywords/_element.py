@@ -33,14 +33,41 @@ class _ElementKeywords(KeywordGroup):
         self._info("Clear text field '%s'" % locator)
         self._element_clear_text_by_locator(locator)
 
-    def click_element(self, locator):
+    def click_element(self, resourceId):
         """Click element identified by `locator`.
 
         Key attributes for arbitrary elements are `index` and `name`. See
         `introduction` for details about locating elements.
         """
-        self._info("Clicking element '%s'." % locator)
-        self._element_find(locator, True, True).click()
+        self._info("Clicking element '%s'." % resourceId)
+        self._element_find(resourceId, True, True).click()
+
+    def check_element(self, resourceId, textname=None, isexist=True, exact_match=False):
+        """
+        检查元素的存在与否与预期是否相符
+        :param resourceId: 元素的resourceid
+        :param textname: 元素的文本
+        :param isexist: 期望元素是否存在
+        :param exact_match:
+        :return: 元素的存在与预期相符时返回True，否则返回False
+        """
+        if textname:
+            el = self._element_find_by_text(resourceId, textname, exact_match)
+            if el and not isexist:
+                self._warn("Exception: unexcepted element {}".format(textname))
+                return None
+            if not el and isexist:
+                self._warn("Exception: text {} not found".format(textname))
+                return None
+        else:
+            el = self._element_find(resourceId, True, True)
+            if el and not isexist:
+                self._warn("Exception: unexcepted element {}".format(resourceId))
+                return None
+            if not el and isexist:
+                self._warn("Exception: element {} not found".format(resourceId))
+                return None
+        return True
 
     def click_button(self, index_or_name):
         """ Click button """
@@ -50,7 +77,7 @@ class _ElementKeywords(KeywordGroup):
             class_name = self._get_class(_platform_class_dict)
             self._click_element_by_class_name(class_name, index_or_name)
 
-    def click_text(self, text, exact_match=False):
+    def click_text(self, resourceId, text, exact_match=False):
         """Click text identified by ``text``.
 
         By default tries to click first text involves given ``text``, if you would
@@ -60,7 +87,7 @@ class _ElementKeywords(KeywordGroup):
         use `locator` with `Get Web Elements` instead.
 
         """
-        self._element_find_by_text(text, exact_match).click()
+        self._element_find_by_text(resourceId, text, exact_match).click()
 
     def input_text(self, locator, text):
         """Types the given `text` into text field identified by `locator`.
@@ -564,13 +591,13 @@ class _ElementKeywords(KeywordGroup):
     def _element_find(self, locator, first_only, required, tag=None):
         application = self._current_application()
         elements = None
-        if isstr(locator):
+        if locator:
             _locator = locator
             elements = self._element_finder.find(application, _locator, tag)
-            if required and len(elements) == 0:
-                raise ValueError("Element locator '" + locator + "' did not match any elements.")
+            if required and elements is None:
+                return None
             if first_only:
-                if len(elements) == 0: return None
+                if elements is None: return None
                 return elements[0]
         elif isinstance(locator, UiObject):
             if first_only:
@@ -581,23 +608,19 @@ class _ElementKeywords(KeywordGroup):
         # ... or raise locator/element specific error if required
         return elements
 
-    def _element_find_by_text(self, text, exact_match=False):
-        if self._get_platform() == 'ios':
-            element = self._element_find(text, True, False)
-            if element:
-                return element
-            else:
-                if exact_match:
-                    _xpath = u'//*[@value="{}" or @label="{}"]'.format(text, text)
-                else:
-                    _xpath = u'//*[contains(@label,"{}") or contains(@value, "{}")]'.format(text, text)
-                return self._element_find(_xpath, True, True)
-        elif self._get_platform() == 'android':
-            if exact_match:
-                _xpath = u'//*[@{}="{}"]'.format('text', text)
-            else:
-                _xpath = u'//*[contains(@{},"{}")]'.format('text', text)
-            return self._element_find(_xpath, True, True)
+    def _element_find_by_text(self, resourceId, text, exact_match=False):
+        locator = {"resourceId": resourceId, "textvalue": text}
+        element = self._element_find(locator, True, False)
+        if element:
+            return element
+        else:
+            raise Exception("find element: {} failed".format(locator))
+        # else:
+        #     if exact_match:
+        #         _xpath = u'//*[@value="{}" or @label="{}"]'.format(text, text)
+        #     else:
+        #         _xpath = u'//*[contains(@label,"{}") or contains(@value, "{}")]'.format(text, text)
+        #     return self._element_find(_xpath, True, True)
 
     def _get_text(self, locator):
         element = self._element_find(locator, True, True)

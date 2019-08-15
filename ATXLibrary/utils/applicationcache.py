@@ -21,7 +21,7 @@ class ApplicationCache(ConnectionCache):
     def close(self):
         if self.current:
             application = self.current
-            application.quit()
+            application.stop()
             self.current = self._no_current
             self.current_index = None
             self._closed.add(application)
@@ -29,6 +29,6 @@ class ApplicationCache(ConnectionCache):
     def close_all(self):
         for application in self._connections:
             if application not in self._closed:
-                application.quit()
+                application.stop()
         self.empty_cache()
         return self.current

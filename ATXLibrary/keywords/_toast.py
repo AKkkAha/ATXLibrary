@@ -6,7 +6,7 @@ from .keywordgroup import KeywordGroup
 class _ToastKeywords(KeywordGroup):
     def get_toast(self):
         """
-        get the message from toast
+        获取Toast中的消息
         :return: message of toast
         """
         toast_msg = self._current_application().toast.get_message()
@@ -14,7 +14,7 @@ class _ToastKeywords(KeywordGroup):
 
     def make_toast(self, msg):
         """
-        make a toast on the phone
-        :param msg: message of toast
+        弹出Toast消息
+        :param msg: Toast中弹出的消息
         """
         self._current_application().toast.show(msg)

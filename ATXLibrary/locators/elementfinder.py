@@ -5,8 +5,6 @@ from robot.api import logger
 import time
 
 TIMEOUT = 10
-
-
 class ElementFinder(object):
 
     def __init__(self):
@@ -25,19 +23,44 @@ class ElementFinder(object):
             'chain': self._find_by_chain
         }
 
-    def find(self, browser, locator, timeout=None):
+    def find(self, browser, locator, tag=None):
+        """
+        查找元素
+        :param browser: 当前应用
+        :param locator: 元素的resourceid或元素的resourceid和text组成的字典
+        :return: 找到元素时返回该元素，否则返回None
+        """
         assert browser is not None
-        assert locator is not None and len(locator) > 0
+        assert locator is not None
+        textvalue = None
+        timeout = TIMEOUT
 
-        if timeout is None:
-            timeout = TIMEOUT
-        nowtime = time.time()
-        while time.time() - nowtime < timeout:
-            element = browser(resourceId=locator)
-            if element.exist():
-                return element
-            time.sleep(0.5)
-        raise Exception("find elememt: \"{}\" failed".format(locator))
+        if type(locator) == str:
+            rscid = locator
+        if "timeout" in locator:
+            timeout = locator["timeout"]
+        if "resourceId" in locator:
+            rscid = locator["resourceId"]
+        if "textvalue" in locator:
+            textvalue = locator["textvalue"]
+
+        if textvalue:
+            nowtime = time.time()
+            while time.time() - nowtime < timeout:
+                element = browser(resourceId=rscid, text=textvalue)
+                if element.exists():
+                    return element
+                time.sleep(0.2)
+        else:
+            nowtime = time.time()
+            while time.time() - nowtime < timeout:
+                element = browser(resourceId=rscid)
+                if element.exists():
+                    return element
+                time.sleep(0.2)
+        logger.warn("find elememt: \"{}\" failed".format(locator))
+        return None
+        # return browser(resourceId=locator)
 
     # Strategy routines, private
 

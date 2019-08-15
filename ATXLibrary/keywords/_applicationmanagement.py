@@ -19,7 +19,7 @@ class _ApplicationManagementKeywords(KeywordGroup):
 
     def close_application(self):
         """Closes the current application and also close webdriver session."""
-        self._debug('Closing application with session id %s' % self._current_application().session_id)
+        self._debug('Closing application with session id %s' % self._current_application())
         self._cache.close()
 
     def close_all_applications(self):
@@ -165,8 +165,8 @@ class _ApplicationManagementKeywords(KeywordGroup):
     # uiautomator2无此方法
     def get_atx_sessionId(self):
         """Returns the current session ID as a reference"""
-        self._info("Appium Session ID: " + self._current_application().session_id)
-        return self._current_application().session_id
+        self._info("Appium Session ID: " + self._current_application())
+        return self._current_application()
 
     # uiautomator2无此方法
     def get_source(self):
